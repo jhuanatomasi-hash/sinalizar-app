@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Lista de Tarefas</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root { color-scheme: light; }
+        html, body { background-color: transparent !important; max-width: 100vw; overflow-x: hidden; }
+        * { box-sizing: border-box; }
+        body { font-family: 'Roboto', system-ui, -apple-system, Segoe UI, Arial, sans-serif; }
+        .nice-scroll { scrollbar-width: thin; scrollbar-color: #cbd5e1 transparent; }
+        .nice-scroll::-webkit-scrollbar { height: 8px; width: 8px; }
+        .nice-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
+    </style>
+</head>
+<body class="bg-transparent p-2">
+    <section class="bg-white text-black rounded-2xl shadow-sm p-3 w-full max-w-sm mx-auto">
+        <h2 class="text-base font-semibold mb-3 text-center">Lista de Tarefas</h2>
+        <div class="flex flex-col gap-2 mb-3">
+            <input id="todo-input" type="text" class="w-full rounded-xl border border-slate-300 px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500 text-sm" placeholder="Adicionar nova tarefa...">
+            <button id="todo-add" class="w-full px-4 py-2 rounded-xl bg-blue-600 text-white hover:bg-blue-700 text-sm">Adicionar</button>
+        </div>
+        <ul id="todo-list" class="nice-scroll max-h-80 overflow-y-auto space-y-2"></ul>
+    </section>
+<script>
+const store={get(e,t){try{return JSON.parse(localStorage.getItem(e))??t}catch{return t}},set(e,t){localStorage.setItem(e,JSON.stringify(t))}};const todoInput=document.getElementById("todo-input"),todoAdd=document.getElementById("todo-add"),todoList=document.getElementById("todo-list");function loadTodos(){return store.get("todos_v1",[])}function saveTodos(e){store.set("todos_v1",e)}function renderTodos(){const e=loadTodos();todoList.innerHTML="",0===e.length?(()=>{const t=document.createElement("div");t.className="text-slate-400 text-xs text-center py-2",t.textContent="Nenhuma tarefa adicionada.",todoList.appendChild(t)})():e.forEach((t,n)=>{const l=document.createElement("li");l.className="flex items-center gap-3 p-2 rounded-xl border border-slate-200 text-black",l.innerHTML=`<input type="checkbox" ${t.done?"checked":""} class="w-5 h-5 rounded-md border-slate-300"><span class="flex-1 ${t.done?"line-through text-slate-400":"text-slate-700"} break-all text-sm">${t.text}</span><button class="px-2 py-1 rounded-lg border border-slate-200 hover:bg-slate-50 text-xs">✖</button>`;const c=l.querySelector('input[type=checkbox]');c.addEventListener("change",()=>{const e=loadTodos();e[n].done=!e[n].done,saveTodos(e),renderTodos()}),l.querySelector("button").addEventListener("click",()=>{const e=loadTodos();e.splice(n,1),saveTodos(e),renderTodos()}),todoList.appendChild(l)})}function addTodo(){const e=(todoInput.value||"").trim();if(!e)return;const t=loadTodos();t.unshift({text:e,done:!1,createdAt:Date.now()}),saveTodos(t),todoInput.value="",renderTodos()}todoAdd.addEventListener("click",addTodo),todoInput.addEventListener("keydown",e=>{e.key==="Enter"&&addTodo()}),document.addEventListener("DOMContentLoaded",renderTodos);
+</script>
+</body>
+</html>

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bloco de Notas</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root { color-scheme: light; }
+        html, body { background-color: transparent !important; max-width: 100vw; overflow-x: hidden; }
+        * { box-sizing: border-box; }
+        body { font-family: 'Roboto', system-ui, -apple-system, Segoe UI, Arial, sans-serif; }
+        .nice-scroll { scrollbar-width: thin; scrollbar-color: #cbd5e1 transparent; }
+        .nice-scroll::-webkit-scrollbar { height: 8px; width: 8px; }
+        .nice-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
+    </style>
+</head>
+<body class="bg-transparent p-2">
+    <section class="bg-white text-black rounded-2xl shadow-sm p-3 w-full max-w-sm mx-auto">
+        <div class="flex items-center justify-between mb-3">
+            <h2 class="text-base font-semibold">Bloco de Notas</h2>
+            <button id="note-new" class="px-3 py-1 rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 text-sm">Nova nota</button>
+        </div>
+        <div id="note-form" class="hidden mb-4 rounded-2xl border border-slate-200 p-3">
+            <div class="flex flex-col gap-2">
+                <input id="note-title" type="text" class="rounded-xl border border-slate-300 px-3 py-2 outline-none focus:ring-2 focus:ring-emerald-500 text-sm" placeholder="Título (opcional)">
+                <textarea id="note-body" rows="4" class="rounded-xl border border-slate-300 px-3 py-2 outline-none focus:ring-2 focus:ring-emerald-500 text-sm" placeholder="Digite sua nota..."></textarea>
+                <div class="flex items-center gap-2 justify-end">
+                    <button id="note-cancel" class="px-3 py-1 rounded-xl border border-slate-200 hover:bg-slate-50 text-sm">Cancelar</button>
+                    <button id="note-save" class="px-3 py-1 rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 text-sm">Salvar</button>
+                </div>
+            </div>
+        </div>
+        <div id="note-list" class="nice-scroll max-h-80 overflow-y-auto space-y-2"></div>
+    </section>
+<script>
+const store={get(e,t){try{return JSON.parse(localStorage.getItem(e))??t}catch{return t}},set(e,t){localStorage.setItem(e,JSON.stringify(t))}};const noteNewBtn=document.getElementById("note-new"),noteForm=document.getElementById("note-form"),noteTitle=document.getElementById("note-title"),noteBody=document.getElementById("note-body"),noteCancel=document.getElementById("note-cancel"),noteSave=document.getElementById("note-save"),noteList=document.getElementById("note-list");let editingIndex=null;function loadNotes(){return store.get("notes_v1",[])}function saveNotes(e){store.set("notes_v1",e)}function openForm(e=!0){noteForm.classList.remove("hidden"),e&&(noteTitle.value="",noteBody.value="",editingIndex=null),noteTitle.focus()}function closeForm(){noteForm.classList.add("hidden"),noteTitle.value="",noteBody.value="",editingIndex=null}noteNewBtn.addEventListener("click",()=>openForm(!0)),noteCancel.addEventListener("click",closeForm),noteSave.addEventListener("click",()=>{const e=noteTitle.value.trim(),t=noteBody.value.trim();if(!e&&!t)return;const n=loadNotes();null===editingIndex?n.unshift({title:e,body:t,createdAt:Date.now(),updatedAt:Date.now()}):n[editingIndex]={...n[editingIndex],title:e,body:t,updatedAt:Date.now()},saveNotes(n),closeForm(),renderNotes()});function renderNotes(){const e=loadNotes();noteList.innerHTML="",0===e.length?(()=>{const t=document.createElement("div");t.className="text-slate-400 text-xs text-center py-8",t.textContent="Nenhuma nota adicionada.",noteList.appendChild(t)})():e.forEach((t,n)=>{const l=document.createElement("article");l.className="p-3 rounded-xl border border-slate-200";const c=t.title?`<h3 class="font-medium text-slate-800 mb-1 break-all">${escapeHtml(t.title)}</h3>`:"",o=t.body?escapeHtml(t.body).slice(0,280):"",s=new Date(t.updatedAt||t.createdAt),r=s.toLocaleString("pt-BR",{dateStyle:"short",timeStyle:"short"});l.innerHTML=`${c}${o?`<p class="text-slate-700 break-all whitespace-pre-wrap text-sm">${o}</p>`:""}<div class="mt-2 flex items-center justify-between text-xs text-slate-500"><span>${r}</span><div class="flex items-center gap-2"><button class="px-2 py-1 rounded-lg border border-slate-200 hover:bg-slate-50">Editar</button><button class="px-2 py-1 rounded-lg border border-rose-200 text-rose-700 hover:bg-rose-50">Excluir</button></div></div>`;const[i,u]=l.querySelectorAll("button");i.addEventListener("click",()=>{editingIndex=n,noteTitle.value=t.title||"",noteBody.value=t.body||"",openForm(!1)}),u.addEventListener("click",()=>{const e=loadNotes();e.splice(n,1),saveNotes(e),renderNotes()}),noteList.appendChild(l)})}function escapeHtml(e){return e.replace(/[&<>"']/g,t=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#-39;"}[t]))}document.addEventListener("DOMContentLoaded",renderNotes);
+</script>
+</body>
+</html>
